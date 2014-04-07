@@ -8,14 +8,16 @@ var mongoUri = process.env.MONGOLAB_URI || process.env.MONGOHQ_URL || 'mongodb:/
 app.use(express.bodyParser());
 
 app.get('/', function(req, res) {
-    res.send('Hello World!');
+    res.send('<h3>HI!</h3>');
 });
 
 app.get('/scores.json', function(req, res) {
     mongo.Db.connect(mongoUri, function (err, db) {
 	db.collection('scoresTemp', function (er, collection) {
 
-	    var c = collection.find({}).sort("score").toArray(function(errr, x){
+	    var uname = req.query.username;
+	    
+	    var c = collection.find({username: uname}).sort("score").toArray(function(errr, x){
 		res.send(x);
 	    });
 
@@ -27,12 +29,14 @@ app.post('/submit.json', function(req, res) {
     mongo.Db.connect(mongoUri, function (err, db) {
 	db.collection('scoresTemp', function (er, collection) {
 
-	    console.log(req.body);
-	    var score = req.body.score;
 	    var username = req.body.username;
+	    var score = req.body.score;
+	    var grid = req.body.grid;
+	    var time = new Date();
+	    var created_at = time.toString();
 	    
-	    collection.insert({"score": score, "username": username}, function (err, r){});
-	    res.send("Added");
+	    collection.insert({"username": username, "score": score, "grid": grid, "created_at": created_at}, function (err, r){});
+	    res.send("Added\n");
 
 	});
     });
