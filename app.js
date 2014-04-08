@@ -6,13 +6,19 @@ var mongoUri = process.env.MONGOLAB_URI || process.env.MONGOHQ_URL || 'mongodb:/
 
 app.use(express.bodyParser());
 
+//Enable CORS
+app.all('/', function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "X-Requested-With");
+    next();
+});
+
 app.get('/', function(req, res) {
     mongo.Db.connect(mongoUri, function (err, db) {
 	db.collection('scoresTemp', function (er, collection) {
 	    var c = collection.find().toArray(function(errr, x){
 		var resString = "<table><tr><th>Username</th><th>Score</th><th>Time</th></tr>";
 		x.sort(function(a,b){return b.score-a.score});
-		console.log(x);
 		for(var i = 0; i < x.length; i++){
 		    resString += "<tr><td>" + x[i].username + "</td><td>" + x[i].score + "</td><td>" + x[i].created_at + "</td></tr>";
 		}
