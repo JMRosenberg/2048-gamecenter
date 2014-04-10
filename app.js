@@ -16,7 +16,7 @@ app.all('/', function(req, res, next) {
 
 app.get('/', function(req, res) {
     mongo.Db.connect(mongoUri, function (err, db) {
-	db.collection('2048data', function (er, collection) {
+	db.collection('scores', function (er, collection) {
 	    var c = collection.find().toArray(function(errr, x){
 		var resString = "<table><tr><th>Username</th><th>Score</th><th>Time</th></tr>";
 		x.sort(function(a,b){return b.score-a.score});
@@ -32,7 +32,7 @@ app.get('/', function(req, res) {
 
 app.get('/scores.json', function(req, res) {
     mongo.Db.connect(mongoUri, function (err, db) {
-	db.collection('2048data', function (er, collection) {
+	db.collection('scores', function (er, collection) {
 	    var uname = req.query.username;
 	    var c = collection.find({username: uname}).toArray(function(errr, x){
 		x.sort(function(a,b){return b.score-a.score});
@@ -54,7 +54,7 @@ app.post('/submit.json', function(req, res) {
     }
     else {
 	mongo.Db.connect(mongoUri, function (err, db) {
-	    db.collection('2048data', function (er, collection) {
+	    db.collection('scores', function (er, collection) {
 		var username = req.body.username;
 		var score = req.body.score;
 		var grid = req.body.grid;
