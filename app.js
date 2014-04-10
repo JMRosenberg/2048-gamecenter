@@ -5,17 +5,18 @@ var app = express();
 var mongoUri = process.env.MONGOLAB_URI || process.env.MONGOHQ_URL || 'mongodb://localhost/mydb';
 
 app.use(express.bodyParser());
+app.use(express.json());
 
-//Enable CORS
 app.all('/', function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "X-Requested-With");
+    res.header("Access-Control-Allow-Methods", "PUT, GET, POST, DELETE, OPTIONS");
+    res.header("Access-Control-Allow-Headers", "*");//X-Requested-With");
     next();
 });
 
 app.get('/', function(req, res) {
     mongo.Db.connect(mongoUri, function (err, db) {
-	db.collection('scoresTemp', function (er, collection) {
+	db.collection('2048data', function (er, collection) {
 	    var c = collection.find().toArray(function(errr, x){
 		var resString = "<table><tr><th>Username</th><th>Score</th><th>Time</th></tr>";
 		x.sort(function(a,b){return b.score-a.score});
@@ -31,31 +32,39 @@ app.get('/', function(req, res) {
 
 app.get('/scores.json', function(req, res) {
     mongo.Db.connect(mongoUri, function (err, db) {
-	db.collection('scoresTemp', function (er, collection) {
-
+	db.collection('2048data', function (er, collection) {
 	    var uname = req.query.username;
-	    
 	    var c = collection.find({username: uname}).toArray(function(errr, x){
 		x.sort(function(a,b){return b.score-a.score});
 		res.send(x);
 	    });
-
 	});
     });
 });
 
 app.post('/submit.json', function(req, res) {
-    mongo.Db.connect(mongoUri, function (err, db) {
-	db.collection('scoresTemp', function (er, collection) {
-	    var username = req.body.username;
-	    var score = req.body.score;
-	    var grid = req.body.grid;
-	    var time = new Date();
-	    var created_at = time.toString();
-	    collection.insert({"username": username, "score": score, "grid": grid, "created_at": created_at}, function (err, r){});
-	    res.send();
+    if(req.body.username === undefined || req.body.username === null){
+	res.send(400);
+    }
+    else if(req.body.score === undefined || req.body.score === null){
+	res.send(400);
+    }
+    else if(req.body.grid === undefined || req.body.grid === null){
+	res.send(400);
+    }
+    else {
+	mongo.Db.connect(mongoUri, function (err, db) {
+	    db.collection('2048data', function (er, collection) {
+		var username = req.body.username;
+		var score = req.body.score;
+		var grid = req.body.grid;
+		var time = new Date();
+		var created_at = time.toString();
+		collection.insert({"username": username, "score": score, "grid": grid, "created_at": created_at}, function (err, r){});
+		res.send();
+	    });
 	});
-    });
+    }
 });
 
 var port = Number(process.env.PORT || 5000);
